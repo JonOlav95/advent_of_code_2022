@@ -3,6 +3,10 @@ import numpy as np
 
 
 def calc_score(df):
+    """Calculate the score where both columns contain A, B and C.
+
+    :param df: A dataframe where the first column is the opponents choice, and the second is yours.
+    """
     picks = df["you"].value_counts()
     picks["B"] = picks["B"] * 2
     picks["C"] = picks["C"] * 3
@@ -17,11 +21,19 @@ def calc_score(df):
     draw_score = len(draws.index) * 3
     win_score = len(wins.index) * 6
 
-    total_score = pick_score + draw_score + win_score
-    print(total_score)
+    print(pick_score + draw_score + win_score)
+
+
+def part_1(df):
+
+    # Rename so both columns have the same format
+    df = df.replace({"you": {"X": "A", "Y": "B", "Z": "C"}})
+    calc_score(df)
 
 
 def part_2(df):
+
+    # Encode the choice of 'you' column such that Y is draw, Z is a win, and X is a loss
     df["you"] = np.where(df["you"] == "Y", df["opponent"], df["you"])
     df["you"] = np.where(((df["you"] == "Z") & (df["opponent"] == "A")), "B", df["you"])
     df["you"] = np.where(((df["you"] == "Z") & (df["opponent"] == "B")), "C", df["you"])
@@ -34,12 +46,8 @@ def part_2(df):
     calc_score(df)
 
 
-def part_1(df):
-    df = df.replace({"you": {"X": "A", "Y": "B", "Z": "C"}})
-    calc_score(df)
-
-
 def main():
+    # Read the input file with two columns, one for each 'player'
     df = pd.read_csv("day_2_input.csv", sep=" ", header=None, names=["opponent", "you"])
     part_1(df)
     part_2(df)

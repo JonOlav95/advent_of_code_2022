@@ -10,7 +10,7 @@ def calc_score(df):
     intersections = df.apply(lambda x: "".join(list(set.intersection(*map(set, list(x))))), axis=1)
     value = intersections.apply(lambda x: ord(x) - 96 if x.islower() else ord(x) - 38)
 
-    return value.sum()
+    print(value.sum())
 
 
 def part_1(df):
@@ -19,7 +19,7 @@ def part_1(df):
     df["compartment_1"] = df["rucksack"].apply(lambda x: x[:int(len(x) / 2)])
     df["compartment_2"] = df["rucksack"].apply(lambda x: x[int(len(x) / 2):])
 
-    print(calc_score(df[["compartment_1", "compartment_2"]]))
+    calc_score(df[["compartment_1", "compartment_2"]])
 
 
 def part_2(df):
@@ -29,7 +29,7 @@ def part_2(df):
     arr = arr.reshape(100, 3)
     df = pd.DataFrame(arr, columns=["g1", "g2", "g3"])
 
-    print(calc_score(df[["g1", "g2", "g3"]]))
+    calc_score(df[["g1", "g2", "g3"]])
 
 
 def main():

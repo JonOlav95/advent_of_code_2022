@@ -31,7 +31,7 @@ def enc(df):
     return df
 
 
-df = pd.read_csv("input_day2.csv", sep=" ", header=None, names=["opponent", "you"])
+df = pd.read_csv("day_2_input.csv", sep=" ", header=None, names=["opponent", "you"])
 df = enc(df)
 #df = df.replace({"you": {"X": "A", "Y": "B", "Z": "C"}})
 

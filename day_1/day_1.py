@@ -1,6 +1,6 @@
 import pandas as pd
 
-df = pd.read_csv("calories.csv", skip_blank_lines=False, header=None, names=["calories"])
+df = pd.read_csv("day_1_input.csv", skip_blank_lines=False, header=None, names=["calories"])
 df["elf_number"] = df.isnull().all(axis=1).cumsum()
 calories_sum = df.groupby("elf_number").sum()
 

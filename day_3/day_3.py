@@ -27,9 +27,9 @@ def part_2(df):
     # Split the rucksacks into three groups
     arr = df["rucksack"].values
     arr = arr.reshape(100, 3)
-    df = pd.DataFrame(arr, columns=["g1", "g2", "g3"])
+    df = pd.DataFrame(arr)
 
-    calc_score(df[["g1", "g2", "g3"]])
+    calc_score(df)
 
 
 def main():

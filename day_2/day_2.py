@@ -1,24 +1,27 @@
 import pandas as pd
 import numpy as np
 
-# A, X = ROCK (1 pts)
-# B, Y = PAPER (2 pts)
-# C, Z = SCISSORS (3 pts)
 
-# A -> A = 3
-# B -> B = 3
-# C -> C = 3
+def calc_score(df):
+    picks = df["you"].value_counts()
+    picks["B"] = picks["B"] * 2
+    picks["C"] = picks["C"] * 3
+    pick_score = sum(picks)
 
-# A -> B = 0
-# A -> C = 6
-# B -> C = 6
+    draws = df[df["opponent"] == df["you"]]
 
-# X = LOSS
-# Y = DRAW
-# Z = WIN
+    wins = df[(((df["you"] == "A") & (df["opponent"] == "C")) |
+               ((df["you"] == "B") & (df["opponent"] == "A")) |
+               ((df["you"] == "C") & (df["opponent"] == "B")))]
+
+    draw_score = len(draws.index) * 3
+    win_score = len(wins.index) * 6
+
+    total_score = pick_score + draw_score + win_score
+    print(total_score)
 
 
-def enc(df):
+def part_2(df):
     df["you"] = np.where(df["you"] == "Y", df["opponent"], df["you"])
     df["you"] = np.where(((df["you"] == "Z") & (df["opponent"] == "A")), "B", df["you"])
     df["you"] = np.where(((df["you"] == "Z") & (df["opponent"] == "B")), "C", df["you"])
@@ -28,31 +31,19 @@ def enc(df):
     df["you"] = np.where(((df["you"] == "X") & (df["opponent"] == "B")), "A", df["you"])
     df["you"] = np.where(((df["you"] == "X") & (df["opponent"] == "C")), "B", df["you"])
 
-    return df
+    calc_score(df)
 
 
-df = pd.read_csv("day_2_input.csv", sep=" ", header=None, names=["opponent", "you"])
-df = enc(df)
-#df = df.replace({"you": {"X": "A", "Y": "B", "Z": "C"}})
+def part_1(df):
+    df = df.replace({"you": {"X": "A", "Y": "B", "Z": "C"}})
+    calc_score(df)
 
-picks = df["you"].value_counts()
-picks["B"] = picks["B"] * 2
-picks["C"] = picks["C"] * 3
-pick_score = sum(picks)
 
-draws = df[df["opponent"] == df["you"]]
+def main():
+    df = pd.read_csv("day_2_input.csv", sep=" ", header=None, names=["opponent", "you"])
+    part_1(df)
+    part_2(df)
 
-wins = df[(((df["you"] == "A") & (df["opponent"] == "C")) |
-           ((df["you"] == "B") & (df["opponent"] == "A")) |
-           ((df["you"] == "C") & (df["opponent"] == "B")))]
 
-#indicies = np.concatenate([draws.index.values, loss.index.values])
-#wins = df.drop(indicies)
-
-draw_score = len(draws.index) * 3
-win_score = len(wins.index) * 6
-
-total_score = pick_score + draw_score + win_score
-
-print()
-
+if __name__ == "__main__":
+    main()

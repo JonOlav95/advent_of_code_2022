@@ -50,7 +50,7 @@ def part_2(arr):
 
 def main():
     # Read the input file as a csv, then cast it to a numpy array
-    df = pd.read_csv("day_4.csv", header=None)
+    df = pd.read_csv("day_4.txt", header=None)
     arr = df.values
 
     part_1(arr)

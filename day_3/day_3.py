@@ -33,7 +33,7 @@ def part_2(df):
 
 
 def main():
-    df = pd.read_csv("day_3_input.csv", header=None, names=["rucksack"])
+    df = pd.read_csv("day_3.txt", header=None, names=["rucksack"])
     part_1(df)
     part_2(df)
 

@@ -25,14 +25,12 @@ def calc_score(df):
 
 
 def part_1(df):
-
     # Rename so both columns have the same format
     df = df.replace({"you": {"X": "A", "Y": "B", "Z": "C"}})
     calc_score(df)
 
 
 def part_2(df):
-
     # Encode the choice of 'you' column such that Y is draw, Z is a win, and X is a loss
     df["you"] = np.where(df["you"] == "Y", df["opponent"], df["you"])
     df["you"] = np.where(((df["you"] == "Z") & (df["opponent"] == "A")), "B", df["you"])
@@ -50,7 +48,7 @@ def main():
     # Read the input file with two columns, one for each 'player'
     df = pd.read_csv("day_2.txt", sep=" ", header=None, names=["opponent", "you"])
     part_1(df)
-    part_2(df)
+    part_1(df)
 
 
 if __name__ == "__main__":

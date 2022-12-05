@@ -2,10 +2,9 @@ import pandas as pd
 
 
 def calc_score(df):
-    """Find all overlapping characters for each row in every column, then calculate the result.
+    """Find all overlapping characters for each row in every column, then calculate and print the result.
 
     :param df: Dataframe containing elf rucksacks.
-    :return: The sum of the priorties.
     """
     intersections = df.apply(lambda x: "".join(list(set.intersection(*map(set, list(x))))), axis=1)
     value = intersections.apply(lambda x: ord(x) - 96 if x.islower() else ord(x) - 38)
@@ -14,7 +13,6 @@ def calc_score(df):
 
 
 def part_1(df):
-
     # Split each rucksack into two components
     df["compartment_1"] = df["rucksack"].apply(lambda x: x[:int(len(x) / 2)])
     df["compartment_2"] = df["rucksack"].apply(lambda x: x[int(len(x) / 2):])
@@ -23,7 +21,6 @@ def part_1(df):
 
 
 def part_2(df):
-
     # Split the rucksacks into three groups
     arr = df["rucksack"].values
     arr = arr.reshape(100, 3)

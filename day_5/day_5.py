@@ -25,7 +25,7 @@ def func(stacks, commands, reverse=True):
 
 def main():
     # YIKES
-    df = pd.read_csv("day_5_cpy.txt", names=["string"], header=None)
+    df = pd.read_csv("day_5.txt", names=["string"], header=None)
     commands = df[9:]
     supply = df[:8]
 

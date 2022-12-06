@@ -21,8 +21,8 @@ def calc(inp, unqiue_length):
 def main():
     # Read as dataframe and boil it down to the single string
     inp = pd.read_csv("day_6.txt", header=None).values[0, 0]
-    calc(inp, 4)
-    calc(inp, 14)
+    calc(inp, unqiue_length=4)
+    calc(inp, unqiue_length=14)
 
 
 if __name__ == "__main__":

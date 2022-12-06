@@ -9,11 +9,12 @@ def calc(inp, unqiue_length):
     :return: None, used to exit function.
     """
     for i in range(len(inp)):
+
+        # Extract string of length unique_length
         s = inp[i: i + unqiue_length]
 
-        length = len(set(s))
-
-        if length == unqiue_length:
+        # Check if all characters in the string is unique
+        if len(set(s)) == unqiue_length:
             print(i + unqiue_length)
             return
 

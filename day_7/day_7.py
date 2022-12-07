@@ -14,14 +14,6 @@ class Node:
             if c.name == name:
                 return c
 
-    # Not needed -- never False
-    def child_exist(self, name):
-        for c in self.child_dirs:
-            if c.name == name:
-                return True
-
-        return False
-
 
 def create_tree():
     root = Node("/", None)
@@ -41,24 +33,21 @@ def create_tree():
                 else:
                     current_node = current_node.get_child(dir_name)
 
+            elif "dir" in line[:3]:
+                folder = re.search("dir (.*)", line).group(1)
+                current_node.child_dirs.append(Node(folder, current_node))
+
             elif "$ ls" in line:
                 continue
 
             else:
-                if "dir" in line[:3]:
-                    folder = re.search("dir (.*)", line).group(1)
+                file_size = re.findall(r"\d+", line)[0]
+                current_node.file_size += int(file_size)
 
-                    if not current_node.child_exist(folder):
-                        current_node.child_dirs.append(Node(folder, current_node))
-
-                else:
-                    file_size = re.findall(r"\d+", line)[0]
-                    current_node.file_size += int(file_size)
-
-                    tmp = current_node.parent
-                    while tmp is not None:
-                        tmp.file_size += int(file_size)
-                        tmp = tmp.parent
+                traverse = current_node.parent
+                while traverse is not None:
+                    traverse.file_size += int(file_size)
+                    traverse = traverse.parent
 
     return root
 

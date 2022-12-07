@@ -53,15 +53,15 @@ def create_tree():
 
 
 def part_1(node):
-    zum = 0
+    rec_sum = 0
 
     if node.file_size < 100000:
-        zum += node.file_size
+        rec_sum += node.file_size
 
     for child in node.child_dirs:
-        zum += part_1(child)
+        rec_sum += part_1(child)
 
-    return zum
+    return rec_sum
 
 
 def part_2(node, value, goal):
@@ -75,6 +75,9 @@ def part_2(node, value, goal):
 
 
 def main():
+
+    # Create a tree structure for the files and folders
+    # The same tree will be used for part 1 and 2
     root = create_tree()
 
     p1 = part_1(root)

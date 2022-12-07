@@ -25,16 +25,15 @@ class Node:
 
 def create_tree():
     root = Node("/", None)
-    current_node = root
 
     with open("day_7.txt") as file:
         for each_line in file:
             line = each_line.rstrip()
 
             if line == "$ cd /":
-                continue
+                current_node = root
 
-            if "$ cd" in line:
+            elif "$ cd" in line:
                 dir_name = re.search("\\$ cd (.*)", line).group(1)
 
                 if dir_name == "..":
@@ -77,7 +76,6 @@ def part_1(node):
 
 
 def part_2(node, value, goal):
-
     if goal <= node.file_size < value:
         value = node.file_size
 
@@ -93,8 +91,8 @@ def main():
     p1 = part_1(root)
     print(p1)
 
-    space_req = 30000000 - (70000000 - root.file_size)
-    p2 = part_2(root, 70000000, space_req)
+    space_req = root.file_size - 40000000
+    p2 = part_2(root, root.file_size, space_req)
     print(p2)
 
 

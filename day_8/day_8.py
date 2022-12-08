@@ -1,22 +1,26 @@
 import pandas as pd
 import numpy as np
+import datetime
 
 
 def part_1(arr):
-    count = 0
+
+    visible_tree = 0
 
     for i in range(len(arr)):
         for j in range(len(arr)):
+
             value = arr[i, j]
-            v1 = np.any(arr[i + 1:, j] >= value)
-            v2 = np.any(arr[:i, j] >= value)
-            v3 = np.any(arr[i, j + 1:] >= value)
-            v4 = np.any(arr[i, :j] >= value)
 
-            if not (v1 and v2 and v3 and v4):
-                count += 1
+            down = np.any(arr[i + 1:, j] >= value)
+            up = np.any(arr[:i, j] >= value)
+            right = np.any(arr[i, j + 1:] >= value)
+            left = np.any(arr[i, :j] >= value)
 
-    print(count)
+            if not (down and up and right and left):
+                visible_tree += 1
+
+    print(visible_tree)
 
 
 def part_2(arr):
@@ -29,23 +33,24 @@ def part_2(arr):
 
         return index
 
-    max_sum = 0
+    highest_scenic_score = 0
+
     for i in range(len(arr)):
         for j in range(len(arr)):
 
             value = arr[i, j]
 
-            v5 = custom_argmax(arr[i + 1:, j], value)
-            v6 = custom_argmax(np.flip(arr[:i, j]), value)
-            v7 = custom_argmax(arr[i, j + 1:], value)
-            v8 = custom_argmax(np.flip(arr[i, :j]), value)
+            down = custom_argmax(arr[i + 1:, j], value)
+            up = custom_argmax(np.flip(arr[:i, j]), value)
+            right = custom_argmax(arr[i, j + 1:], value)
+            left = custom_argmax(np.flip(arr[i, :j]), value)
 
-            zum = v5 * v6 * v7 * v8
+            scenic_score = down * up * right * left
 
-            if zum > max_sum:
-                max_sum = zum
+            if scenic_score > highest_scenic_score:
+                highest_scenic_score = scenic_score
 
-    print(max_sum)
+    print(highest_scenic_score)
 
 
 def main():

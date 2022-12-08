@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-import datetime
 
 
 def part_1(arr):
@@ -54,8 +53,8 @@ def part_2(arr):
 
 
 def main():
-    df = pd.read_csv("day_8.txt", names=["col"], header=None)
-    df = df["col"].apply(lambda x: pd.Series(list(x)))
+    df = pd.read_csv("day_8.txt", names=["header"], header=None)
+    df = df["header"].apply(lambda x: pd.Series(list(x)))
 
     arr = df.values
     arr = arr.astype(int)

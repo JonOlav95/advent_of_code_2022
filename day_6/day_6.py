@@ -4,7 +4,7 @@ import pandas as pd
 def calc(inp, unqiue_length):
     """Find first string with unique characters of length unique_length in inp.
 
-    :param inp: The input string.
+    :param inp: The day_9.txt string.
     :param unqiue_length: Length of unique characters to identify.
     :return: None, used to exit function.
     """

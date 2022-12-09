@@ -45,7 +45,7 @@ def part_2(df):
 
 
 def main():
-    # Read the input file with two columns, one for each 'player'
+    # Read the day_9.txt file with two columns, one for each 'player'
     df = pd.read_csv("day_2.txt", sep=" ", header=None, names=["opponent", "you"])
 
     part_1(df)

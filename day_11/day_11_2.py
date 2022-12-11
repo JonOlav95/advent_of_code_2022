@@ -16,7 +16,7 @@ class Monkey:
         self.false_throw = false
         self.inspection = 0
 
-    def play(self, monkeys):
+    def play(self):
         values = []
         to = []
 
@@ -26,17 +26,6 @@ class Monkey:
             value = self.operation(item)
 
             if value % self.test_value == 0:
-
-                new_value = 1
-
-                for m in monkeys:
-                    tmp = value
-                    tmp = m.operation(tmp)
-
-                    if tmp % m.test_value:
-                        new_value *= tmp
-
-                value = new_value
                 to.append(self.true_throw)
 
             else:
@@ -78,15 +67,12 @@ def main():
         for i in range(0, len(lines), 7):
             monkeys.append(create_monkey(lines[i:i + 7]))
 
-    test_values = []
-    for monkey in monkeys:
-        test_values.append(monkey.test_value)
 
     rounds = 20
     for i in range(rounds):
         print(i)
         for monkey in monkeys:
-            values, to = monkey.play(monkeys)
+            values, to = monkey.play()
 
             for j in range(len(to)):
                 monkeys[to[j]].items.append(values[j])

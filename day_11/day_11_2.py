@@ -16,7 +16,7 @@ class Monkey:
         self.false_throw = false
         self.inspection = 0
 
-    def play(self):
+    def play(self, test_value):
         values = []
         to = []
 
@@ -24,6 +24,7 @@ class Monkey:
             self.inspection += 1
 
             value = self.operation(item)
+            value %= test_value
 
             if value % self.test_value == 0:
                 to.append(self.true_throw)
@@ -60,19 +61,23 @@ def create_monkey(lines):
 
 
 def main():
-    with open("sample.txt") as file:
+    with open("day_11.txt") as file:
         lines = file.readlines()
         monkeys = []
 
         for i in range(0, len(lines), 7):
             monkeys.append(create_monkey(lines[i:i + 7]))
 
+    test_values = 1
 
-    rounds = 20
+    for monkey in monkeys:
+        test_values *= monkey.test_value
+
+    rounds = 10000
     for i in range(rounds):
         print(i)
         for monkey in monkeys:
-            values, to = monkey.play()
+            values, to = monkey.play(test_values)
 
             for j in range(len(to)):
                 monkeys[to[j]].items.append(values[j])

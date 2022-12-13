@@ -1,110 +1,114 @@
 import collections
+from copy import copy
 
 import pandas as pd
 import numpy as np
 import sys
-
-step_solution = 9999
-
-sys.setrecursionlimit(10000)
+from queue import PriorityQueue
+import heapq
 
 
 class Node:
 
-    def __init__(self, y, x, value):
-        self.y = y
-        self.x = x
-        self.value = value
-        self.nodes = []
+    def __init__(self):
+        self.value = -1
+        self.distance = 999999
+        self.position = 0
         self.visited = False
+        
+
+def find_smallest(graph):
+    distance = 9999999
+    min_node = None
+    for y in range(len(graph)):
+        for x in range(len(graph[0])):
+
+            if graph[y, x].visited:
+                continue
+
+            if graph[y, x].distance < distance:
+                distance = graph[y, x].distance
+                min_node = graph[y, x]
+
+    return min_node
 
 
-def bfs(grid, start, end_y, end_x, max_x, max_y):
-    queue = collections.deque([[start]])
-    seen = {start}
+def dijkstra(arr, start, end):
 
-    while queue:
-        path = queue.popleft()
-        x, y = path[0].x, path[0].y
+    graph = np.empty((len(arr), len(arr[0])), dtype=object)
+    unvisited = []
 
-        if y == end_y and x == end_x:
-            return path
+    for y in range(len(arr)):
+        for x in range(len(arr[0])):
+            node = Node()
+            node.position = (y, x)
+            node.value = arr[y, x]
+            graph[y, x] = node
+            unvisited.append(node)
+
+    graph[start].distance = 0
+    travel_chart = np.zeros((len(arr), len(arr[0])), dtype=int)
+    while True:
+
+        current_node = find_smallest(graph)
+
+        if current_node.distance > 100000:
+            return 100000
+
+        current_node.visited = True
+        y, x = current_node.position
+        travel_chart[y, x] = 1
+
+        if (y, x) == end:
+            print(current_node.distance)
+            return current_node.distance
 
         positions = [(y, x + 1), (y, x - 1), (y - 1, x), (y + 1, x)]
 
         for pos in positions:
+
             if sum(n < 0 for n in pos) > 0:
                 continue
 
-            if pos[0] >= max_y or pos[1] >= max_x:
+            if pos[0] >= len(arr) or pos[1] >= len(arr[0]):
                 continue
 
-            queue.append(path + [pos])
-            seen.add(pos)
+            if current_node.value < graph[pos].value - 1:
+                continue
+
+            travel_node = graph[pos]
+            distance = current_node.distance + 1
+
+            if travel_node.distance > distance:
+                travel_node.distance = distance
 
 
 def main():
-    def build_nodes():
-
-        node_arr = np.empty((len(arr), len(arr[0])), dtype=object)
-
-        for x in range(max_x):
-            for y in range(max_y):
-                value = ord(arr[y, x])
-                node = Node(y, x, value)
-                node_arr[y, x] = node
-
-        return node_arr
-
-    def build_connection(node_arr):
-
-        for x in range(max_x):
-            for y in range(max_y):
-                current_node = node_arr[y, x]
-                value = current_node.value
-
-                positions = [(y, x + 1), (y, x - 1), (y - 1, x), (y + 1, x)]
-
-                for pos in positions:
-
-                    if sum(n < 0 for n in pos) > 0:
-                        continue
-
-                    if pos[0] >= max_y or pos[1] >= max_x:
-                        continue
-
-                    travel_value = node_arr[pos].value
-
-                    if value >= travel_value - 1:
-                        current_node.nodes.append(node_arr[pos])
-
-        return node_arr
-
     arr = pd.read_csv("day_12.txt", header=None).values.squeeze()
     arr = np.array(list((map(list, arr))))
 
     start = np.where(arr == "S")
     end = np.where(arr == "E")
 
-    start_y = start[0][0]
-    start_x = start[1][0]
+    start = (start[0][0], start[1][0])
+    end = (end[0][0], end[1][0])
 
-    end_y = end[0][0]
-    end_x = end[1][0]
+    arr[start] = "a"
+    arr[end] = "z"
 
-    arr[start_y, start_x] = "a"
-    arr[end_y, end_x] = "z"
+    maze = arr.view(np.int32) - 96
 
-    max_y = len(arr)
-    max_x = len(arr[0])
 
-    travel_history = np.full((len(arr), len(arr[0])), 0)
+    # BRUTE FORCE WINS
+    ways = []
+    for y in range(len(arr)):
+        for x in range(len(arr[0])):
+            if arr[y, x] == "a":
+                value = dijkstra(copy(maze), (y, x), end)
+                ways.append(value)
 
-    graph = build_nodes()
-    graph = build_connection(graph)
-    bfs(graph, graph[start_y, start_x], end_y, end_x, max_x, max_y)
-
-    print()
+    ways.sort()
+    print(ways)
 
 
 if __name__ == "__main__":

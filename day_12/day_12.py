@@ -1,68 +1,84 @@
+import collections
+
 import pandas as pd
 import numpy as np
+import sys
 
 step_solution = 9999
 
+sys.setrecursionlimit(10000)
 
-def main():
-    def function(y, x, steps=0):
-        global step_solution
-        if step_solution < steps:
-            return
 
-        if travel_history[y, x] == 4:
-            return
+class Node:
 
-        x_distance = x - end_x
-        y_distance = y - end_y
+    def __init__(self, y, x, value):
+        self.y = y
+        self.x = x
+        self.value = value
+        self.nodes = []
+        self.visited = False
 
-        if x_distance > 0:
-            move_left = abs(x_distance)
-            move_right = -abs(x_distance)
-        else:
-            move_left = -abs(x_distance)
-            move_right = abs(x_distance)
 
-        if y_distance > 0:
-            move_up = abs(y_distance)
-            move_down = -abs(y_distance)
-        else:
-            move_up = -abs(y_distance)
-            move_down = abs(y_distance)
+def bfs(grid, start, end_y, end_x, max_x, max_y):
+    queue = collections.deque([[start]])
+    seen = {start}
 
-        # R L U P
+    while queue:
+        path = queue.popleft()
+        x, y = path[0].x, path[0].y
+
+        if y == end_y and x == end_x:
+            return path
+
         positions = [(y, x + 1), (y, x - 1), (y - 1, x), (y + 1, x)]
-        tmp_arr = [move_right, move_left, move_up, move_down]
-        positions = [x for _, x in sorted(zip(tmp_arr, positions), reverse=True)]
-
-        letter = arr[y, x]
-
-        if x == end_x and y == end_y:
-            
-            if steps < step_solution:
-                step_solution = steps
-            
-            print(steps)
-            win_length.append(steps)
-            return
-
-        travel_history[y, x] += 1
 
         for pos in positions:
-
             if sum(n < 0 for n in pos) > 0:
                 continue
 
-            if pos[0] > max_y or pos[1] > max_x:
+            if pos[0] >= max_y or pos[1] >= max_x:
                 continue
 
-            travel_letter = arr[pos]
+            queue.append(path + [pos])
+            seen.add(pos)
 
-            if travel_history[pos] >= 1:
-                continue
 
-            if ord(letter) >= ord(travel_letter) - 1:
-                function(*pos, steps + 1)
+def main():
+    def build_nodes():
+
+        node_arr = np.empty((len(arr), len(arr[0])), dtype=object)
+
+        for x in range(max_x):
+            for y in range(max_y):
+                value = ord(arr[y, x])
+                node = Node(y, x, value)
+                node_arr[y, x] = node
+
+        return node_arr
+
+    def build_connection(node_arr):
+
+        for x in range(max_x):
+            for y in range(max_y):
+                current_node = node_arr[y, x]
+                value = current_node.value
+
+                positions = [(y, x + 1), (y, x - 1), (y - 1, x), (y + 1, x)]
+
+                for pos in positions:
+
+                    if sum(n < 0 for n in pos) > 0:
+                        continue
+
+                    if pos[0] >= max_y or pos[1] >= max_x:
+                        continue
+
+                    travel_value = node_arr[pos].value
+
+                    if value >= travel_value - 1:
+                        current_node.nodes.append(node_arr[pos])
+
+        return node_arr
 
     arr = pd.read_csv("day_12.txt", header=None).values.squeeze()
     arr = np.array(list((map(list, arr))))
@@ -79,17 +95,16 @@ def main():
     arr[start_y, start_x] = "a"
     arr[end_y, end_x] = "z"
 
-    win_length = []
-    step_limit = 999999999
-
-    max_y = len(arr) - 1
-    max_x = len(arr[0]) - 1
+    max_y = len(arr)
+    max_x = len(arr[0])
 
     travel_history = np.full((len(arr), len(arr[0])), 0)
 
-    function(start_y, start_x)
-    win_length.sort()
-    print(win_length)
+    graph = build_nodes()
+    graph = build_connection(graph)
+    bfs(graph, graph[start_y, start_x], end_y, end_x, max_x, max_y)
+
+    print()
 
 
 if __name__ == "__main__":

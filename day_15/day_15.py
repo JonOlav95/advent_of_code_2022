@@ -4,23 +4,29 @@ import re
 
 
 def mark_signal(row, zone):
+    # zone[row["sensor_y"], row["sensor_x"]] = 3
+    # zone[row["sensor_y"], row["sensor_x"] + 1] = 3
+    # zone[row["sensor_y"], row["sensor_x"] + 2] = 3
+    # zone[row["sensor_y"], row["sensor_x"] + 3] = 3
 
-    #zone[row["sensor_y"], row["sensor_x"]] = 3
-   #zone[row["sensor_y"], row["sensor_x"] + 1] = 3
-   #zone[row["sensor_y"], row["sensor_x"] + 2] = 3
-   #zone[row["sensor_y"], row["sensor_x"] + 3] = 3
+    # zone[row["sensor_y"], row["sensor_x"] - 3] = 3
+    # zone[row["sensor_y"] + 1, row["sensor_x"] - 2] = 3
+    # zone[row["sensor_y"] - 1, row["sensor_x"] - 2] = 3
+
+    # zone[row["sensor_y"], row["sensor_x"] - 1] = 3
+
+    # zone[row["sensor_y"] + j, row["sensor_x"] + i + row["distance"]] = 3
+
+    for x in range(row["distance"] + row["sensor_x"], row["sensor_x"], -1):
+        for i in range(row["distance"] + row["sensor_x"] - x):
+            pass
+
+    for x in range(row["sensor_x"] - row["distance"], row["sensor_x"]):
+        for i in range(row["sensor_x"] + x):
+            zone[row["sensor_y"] + i, x] = 3
+            zone[row["sensor_y"] - i, x] = 3
 
 
-   #zone[row["sensor_y"], row["sensor_x"] - 3] = 3
-   #zone[row["sensor_y"] + 1, row["sensor_x"] - 2] = 3
-   #zone[row["sensor_y"] - 1, row["sensor_x"] - 2] = 3
-
-   #zone[row["sensor_y"], row["sensor_x"] - 1] = 3
-
-    for i in range(row["distance"] - 1):
-        for j in range(i):
-            zone[row["sensor_y"] + j, row["sensor_x"] + i - row["distance"]] = 3
-            zone[row["sensor_y"] - j, row["sensor_x"] + i - row["distance"]] = 3
 
     print("")
 

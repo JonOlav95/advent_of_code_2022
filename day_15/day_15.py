@@ -3,36 +3,37 @@ import numpy as np
 import re
 
 
-def mark_signal(row, zone):
-    # zone[row["sensor_y"], row["sensor_x"]] = 3
-    # zone[row["sensor_y"], row["sensor_x"] + 1] = 3
-    # zone[row["sensor_y"], row["sensor_x"] + 2] = 3
-    # zone[row["sensor_y"], row["sensor_x"] + 3] = 3
-
-    # zone[row["sensor_y"], row["sensor_x"] - 3] = 3
-    # zone[row["sensor_y"] + 1, row["sensor_x"] - 2] = 3
-    # zone[row["sensor_y"] - 1, row["sensor_x"] - 2] = 3
-
-    # zone[row["sensor_y"], row["sensor_x"] - 1] = 3
-
-    # zone[row["sensor_y"] + j, row["sensor_x"] + i + row["distance"]] = 3
-
-    for x in range(row["distance"] + row["sensor_x"], row["sensor_x"], -1):
-        for i in range(row["distance"] + row["sensor_x"] - x):
-            pass
-
-    for x in range(row["sensor_x"] - row["distance"], row["sensor_x"]):
-        for i in range(row["sensor_x"] + x):
-            zone[row["sensor_y"] + i, x] = 3
-            zone[row["sensor_y"] - i, x] = 3
+def place_tile(y, x, max_x, max_y):
+    if y < 0:
+        return
+    elif x < 0:
+        return
+    elif y > max_y - 1:
+        return
+    elif x > max_x - 1:
+        return
 
 
 
-    print("")
+def mark_signal(row, max_x, max_y):
+
+    distance = row["distance"]
+    sensor_x = row["sensor_x"]
+    sensor_y = row["sensor_y"]
+
+    for x in range(sensor_x - distance, sensor_x):
+        for i in range(sensor_x + x):
+            place_tile(sensor_y + i, x, max_x, max_y)
+            place_tile(sensor_y - i, x, max_x, max_y)
+
+    for x in range(sensor_x + distance, sensor_x - 1, -1):
+        for i in range(distance + sensor_x - x + 1):
+            place_tile(sensor_y + i, x, max_x, max_y)
+            place_tile(sensor_y - i, x, max_x, max_y)
 
 
 def main():
-    df = pd.read_csv("sample.txt", header=None, names=["sensor", "beacon"], sep=":")
+    df = pd.read_csv("day_15.txt", header=None, names=["sensor", "beacon"], sep=":")
     df["sensor"] = df["sensor"].apply(lambda x: list(map(int, re.findall(r"-?\d+", x))))
     df["beacon"] = df["beacon"].apply(lambda x: list(map(int, re.findall(r"-?\d+", x))))
 
@@ -49,10 +50,10 @@ def main():
     df["beacon_y"] = df["beacon"].apply(lambda x: x[1])
 
     max_size = df.max(axis=0)
+
     max_x = max_size[["sensor_x", "beacon_x"]].max(axis=0) + 1
     max_y = max_size[["sensor_y", "beacon_y"]].max(axis=0) + 1
 
-    zone = np.zeros(shape=(max_y, max_x), dtype=int)
 
     df["distance_x"] = df["sensor_x"] - df["beacon_x"]
     df["distance_y"] = df["sensor_y"] - df["beacon_y"]
@@ -62,10 +63,10 @@ def main():
 
     df["distance"] = df["distance_x"] + df["distance_y"]
 
-    zone[df["sensor_y"], df["sensor_x"]] = 1
-    zone[df["beacon_y"], df["beacon_x"]] = 2
+    df.apply(mark_signal, max_x=max_x, max_y=max_y, axis=1)
 
-    df.apply(mark_signal, zone=zone, axis=1)
+    row = 10
+
 
     return
 

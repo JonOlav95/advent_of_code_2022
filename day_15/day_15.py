@@ -3,33 +3,29 @@ import numpy as np
 import re
 
 
-def place_tile(y, x, max_x, max_y):
-    if y < 0:
-        return
-    elif x < 0:
-        return
-    elif y > max_y - 1:
-        return
-    elif x > max_x - 1:
-        return
-
-
-
-def mark_signal(row, max_x, max_y):
+def mark_signal(row, row_number, marks):
 
     distance = row["distance"]
     sensor_x = row["sensor_x"]
     sensor_y = row["sensor_y"]
 
-    for x in range(sensor_x - distance, sensor_x):
-        for i in range(sensor_x + x):
-            place_tile(sensor_y + i, x, max_x, max_y)
-            place_tile(sensor_y - i, x, max_x, max_y)
+    if sensor_y < row_number:
+        distance_to_row = row_number - sensor_y
 
-    for x in range(sensor_x + distance, sensor_x - 1, -1):
-        for i in range(distance + sensor_x - x + 1):
-            place_tile(sensor_y + i, x, max_x, max_y)
-            place_tile(sensor_y - i, x, max_x, max_y)
+    elif sensor_y > row_number:
+        distance_to_row = sensor_y - row_number
+    else:
+        distance_to_row = 0
+
+    in_distance = distance - distance_to_row
+
+    # Not in range of row
+    if in_distance < 0:
+        return
+
+    # Start X, end X
+
+    marks.append(set(range(sensor_x - in_distance, sensor_x + in_distance + 1)))
 
 
 def main():
@@ -40,20 +36,11 @@ def main():
     # df["sensor"] = df["sensor"].apply(lambda x: list(map(lambda z: z + 2, x)))
     # df["beacon"] = df["beacon"].apply(lambda x: list(map(lambda z: z + 2, x)))
 
-    df["sensor"] = df["sensor"].apply(lambda x: list([x[0] + 2, x[1]]))
-    df["beacon"] = df["beacon"].apply(lambda x: list([x[0] + 2, x[1]]))
-
     df["sensor_x"] = df["sensor"].apply(lambda x: x[0])
     df["sensor_y"] = df["sensor"].apply(lambda x: x[1])
 
     df["beacon_x"] = df["beacon"].apply(lambda x: x[0])
     df["beacon_y"] = df["beacon"].apply(lambda x: x[1])
-
-    max_size = df.max(axis=0)
-
-    max_x = max_size[["sensor_x", "beacon_x"]].max(axis=0) + 1
-    max_y = max_size[["sensor_y", "beacon_y"]].max(axis=0) + 1
-
 
     df["distance_x"] = df["sensor_x"] - df["beacon_x"]
     df["distance_y"] = df["sensor_y"] - df["beacon_y"]
@@ -63,12 +50,19 @@ def main():
 
     df["distance"] = df["distance_x"] + df["distance_y"]
 
-    df.apply(mark_signal, max_x=max_x, max_y=max_y, axis=1)
+    marks = []
+    row_number = 2000000
 
-    row = 10
+    df.apply(mark_signal, row_number=row_number, marks=marks, axis=1)
 
+    beacon_at_row = len(df[df["beacon_y"] == row_number]["beacon"].value_counts().index)
+    sensor_at_row = len(df[df["sensor_y"] == row_number]["sensor"].value_counts().index)
 
-    return
+    bound = set(range(0, 4000000))
+
+    total_marks = sorted(set.union(*marks))
+    total_marks = len(total_marks) - beacon_at_row - sensor_at_row
+    print(total_marks)
 
 
 if __name__ == "__main__":

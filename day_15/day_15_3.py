@@ -31,10 +31,10 @@ def mark_signal(row, row_number, marks):
     if x_start < 0:
         x_start = 0
 
-    if x_end > 20:
-        x_end = 20
+    if x_end > 4000000:
+        x_end = 4000000
 
-    marks.append(set(range(x_start, x_end)))
+    marks.append([x_start, x_end])
 
 
 def main():
@@ -59,19 +59,16 @@ def main():
 
     df["distance"] = df["distance_x"] + df["distance_y"]
 
-    marks = []
-    row_number = 2000000
+    for i in range(4000000):
+        marks = []
+        df.apply(mark_signal, row_number=i, marks=marks, axis=1)
 
-    df.apply(mark_signal, row_number=row_number, marks=marks, axis=1)
+        marks = np.array(marks)
+        marks = marks[marks[:, 1].argsort()]
 
-    beacon_at_row = len(df[df["beacon_y"] == row_number]["beacon"].value_counts().index)
-    sensor_at_row = len(df[df["sensor_y"] == row_number]["sensor"].value_counts().index)
+        x_starts = marks[:, 0]
+        y_starts = marks[:, 1]
 
-    bound = set(range(0, 4000000))
-
-    total_marks = sorted(set.union(*marks))
-    total_marks = len(total_marks) - beacon_at_row - sensor_at_row
-    print(total_marks)
 
 
 if __name__ == "__main__":

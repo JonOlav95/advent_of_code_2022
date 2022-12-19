@@ -28,12 +28,12 @@ def mark_signal(row, row_number, marks):
     x_start = sensor_x - in_distance
     x_end = sensor_x + in_distance + 1
 
-    if x_start < 0:
-        x_start = 0
-
-    if x_end > 4000000:
-        x_end = 4000000
-
+    #if x_start < 0:
+    #    x_start = 0
+#
+    #if x_end > 4000000:
+    #    x_end = 4000000
+#
     marks.append([x_start, x_end])
 
 

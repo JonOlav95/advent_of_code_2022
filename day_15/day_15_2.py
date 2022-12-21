@@ -3,53 +3,38 @@ import numpy as np
 import re
 
 
-def mark_signal(row, marks):
+def mark_signal(row, row_number, marks):
+
     distance = row["distance"]
     sensor_x = row["sensor_x"]
     sensor_y = row["sensor_y"]
 
-    for row_number in range(400000):
+    if sensor_y < row_number:
+        distance_to_row = row_number - sensor_y
 
-        if sensor_y < row_number:
-            distance_to_row = row_number - sensor_y
+    elif sensor_y > row_number:
+        distance_to_row = sensor_y - row_number
+    else:
+        distance_to_row = 0
 
-        elif sensor_y > row_number:
-            distance_to_row = sensor_y - row_number
-        else:
-            distance_to_row = 0
+    in_distance = distance - distance_to_row
 
-        in_distance = distance - distance_to_row
+    # Not in range of row
+    if in_distance < 0:
+        return
 
-        # Not in range of row
-        if in_distance < 0:
-            continue
+    # Start X, end X
 
-        # Start X, end X
+    x_start = sensor_x - in_distance
+    x_end = sensor_x + in_distance + 1
 
-        x_start = sensor_x - in_distance
-        x_end = sensor_x + in_distance + 1
+    if x_start < 0:
+        x_start = 0
 
-        if x_start > 400000:
-            continue
+    if x_end > 20:
+        x_end = 20
 
-        if x_end < 0:
-            continue
-
-        if x_end > 400000:
-            x_end = 400000
-
-        if x_start < 0:
-            x_start = 0
-
-        marks.append(set(range(x_start, x_end)))
-
-
-def extract(row, x_values, y_values):
-    print()
-
-
-def x_ranges(row):
-    pass
+    marks.append(set(range(x_start, x_end)))
 
 
 def main():
@@ -74,18 +59,19 @@ def main():
 
     df["distance"] = df["distance_x"] + df["distance_y"]
 
-    df["end_x1"] = df["sensor_x"] - df["distance"]
-    df["end_x2"] = df["sensor_x"] + df["distance"]
+    marks = []
+    row_number = 2000000
 
-    df["end_y1"] = df["sensor_y"] - df["distance"]
-    df["end_y2"] = df["sensor_y"] + df["distance"]
+    df.apply(mark_signal, row_number=row_number, marks=marks, axis=1)
 
-    x_values = np.arange(0, 4000000, 1, dtype=int)
-    y_values = np.arange(0, 4000000, 1, dtype=int)
+    beacon_at_row = len(df[df["beacon_y"] == row_number]["beacon"].value_counts().index)
+    sensor_at_row = len(df[df["sensor_y"] == row_number]["sensor"].value_counts().index)
 
-    df.apply(x_ranges)
-   # df.apply(extract, x_values=x_values, y_values=y_values, axis=1)
+    bound = set(range(0, 4000000))
 
+    total_marks = sorted(set.union(*marks))
+    total_marks = len(total_marks) - beacon_at_row - sensor_at_row
+    print(total_marks)
 
 
 if __name__ == "__main__":

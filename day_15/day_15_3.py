@@ -4,7 +4,6 @@ import re
 
 
 def mark_signal(row, row_number, marks):
-
     distance = row["distance"]
     sensor_x = row["sensor_x"]
     sensor_y = row["sensor_y"]
@@ -28,12 +27,12 @@ def mark_signal(row, row_number, marks):
     x_start = sensor_x - in_distance
     x_end = sensor_x + in_distance + 1
 
-    #if x_start < 0:
-    #    x_start = 0
-#
-    #if x_end > 4000000:
-    #    x_end = 4000000
-#
+    if x_start < 0:
+        x_start = 0
+
+    if x_end > 4000000:
+        x_end = 4000000
+
     marks.append([x_start, x_end])
 
 
@@ -59,15 +58,44 @@ def main():
 
     df["distance"] = df["distance_x"] + df["distance_y"]
 
-    for i in range(4000000):
+    sensor_ranges = df["sensor_x"].values
+
+    for i in sensor_ranges:
+
+        mins_dist = 999999999
+
         marks = []
         df.apply(mark_signal, row_number=i, marks=marks, axis=1)
 
-        marks = np.array(marks)
-        marks = marks[marks[:, 1].argsort()]
+        marks = pd.DataFrame(marks, columns=["x_start", "x_end"])
 
-        x_starts = marks[:, 0]
-        y_starts = marks[:, 1]
+        bot_point = 0
+        top_point = 0
+
+        while not marks.empty:
+            marks["distance"] = marks["x_start"] - top_point
+
+            min_row = marks[marks["distance"] == marks["distance"].min()]
+
+            new_bot_point = min_row["x_start"].values[0]
+            new_top_point = min_row["x_end"].values
+
+            new_top_point = np.max(new_top_point)
+
+            dist = top_point - new_bot_point
+
+            if dist != 0 and dist < mins_dist:
+                mins_dist = dist
+                print(mins_dist)
+
+            if top_point < new_bot_point:
+                print("missing value")
+
+            if new_top_point > top_point:
+                top_point = new_top_point
+
+            marks = marks[marks["distance"] != marks["distance"].min()]
+
 
 
 

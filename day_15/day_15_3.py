@@ -41,8 +41,6 @@ def main():
     df["sensor"] = df["sensor"].apply(lambda x: list(map(int, re.findall(r"-?\d+", x))))
     df["beacon"] = df["beacon"].apply(lambda x: list(map(int, re.findall(r"-?\d+", x))))
 
-    # df["sensor"] = df["sensor"].apply(lambda x: list(map(lambda z: z + 2, x)))
-    # df["beacon"] = df["beacon"].apply(lambda x: list(map(lambda z: z + 2, x)))
 
     df["sensor_x"] = df["sensor"].apply(lambda x: x[0])
     df["sensor_y"] = df["sensor"].apply(lambda x: x[1])
@@ -95,8 +93,6 @@ def main():
                 top_point = new_top_point
 
             marks = marks[marks["distance"] != marks["distance"].min()]
-
-
 
 
 if __name__ == "__main__":

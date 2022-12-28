@@ -1,3 +1,4 @@
+from copy import copy
 from itertools import compress
 
 import pandas as pd
@@ -23,7 +24,6 @@ class Node:
 
 
 def create_neighbours(row, graph):
-
     node = [x for x in graph if x.idx == row["valve"]][0]
 
     for lead in row["leads_to"]:
@@ -31,43 +31,100 @@ def create_neighbours(row, graph):
         node.add_neighbour(lead, 1)
 
 
-def from_to(graph, from_node, to_node):
-    visited_nodes = [from_node]
-
-
-def rec(graph, cnode, acc_flow, minute):
-    for key, neighbours in graph.node_dict.items():
-        print("")
-    print("x")
-
-
 def create_node(row):
     node = Node(row["valve"], int(row["flow_rate"]))
     return node
 
 
-def move_neighbours(from_node, to_node):
-    if from_node == to_node:
+def recursion(node, add_node, distance):
+
+    if node == add_node:
         return
 
-    neighbours = [subl for subl in to_node.neighbours if from_node not in subl]
+    for n in node.neighbours:
+        if n[0] == add_node:
+            if distance <= n[1]:
+                node.neighbours.remove(n)
 
-    if neighbours == to_node.neighbours:
-        return
+            if distance > n[1]:
+                return
 
-    from_neighbours = from_node.neighbours
+            break
 
-    for new_neigh in from_neighbours:
-        if new_neigh not in to_node.neighbours:
-            to_node.add_neighbour(new_neigh[0], new_neigh[1] + 1)
+    node.add_neighbour(add_node, distance)
 
-    if to_node.fr == 0:
-        for neigh in to_node.neighbours:
-            move_neighbours(to_node, neigh[0])
+    for neigh in add_node.neighbours:
+        if neigh[1] > 1:
+            continue
+
+        recursion(node, neigh[0], distance + neigh[1])
+
+
+def sort_by_max(start_node, minute):
+    length = len(start_node.neighbours) - 1
+    values = []
+
+    for neigh in start_node.neighbours:
+        neighbour = neigh[0]
+        distance = neigh[1]
+
+        value = neighbour.fr * (minute - distance - 1)
+        values.append(value)
+
+    for i in range(length):
+        for j in range(0, length - i):
+            if values[j] < values[j + 1]:
+                values[j], values[j + 1] = values[j + 1], values[j]
+                start_node.neighbours[j], start_node.neighbours[j + 1] = start_node.neighbours[j + 1], \
+                start_node.neighbours[j]
+
+    return values
+
+
+def part_1(node, minute, flow_rate, max_flow):
+
+    if minute <= 1:
+        node.open = False
+
+        if flow_rate > max_flow:
+            return flow_rate
+
+        return max_flow
+
+    fr = sort_by_max(node, minute)
+
+    for i in range(len(fr)):
+        neighbour = node.neighbours[i][0]
+        distance = node.neighbours[i][1]
+
+        if neighbour.open:
+            continue
+
+        if minute - distance <= 0:
+            continue
+
+        neighbour.open = True
+
+        flow_rate += fr[i]
+        minute -= distance # Time to travel
+        minute -= 1 # Time to open
+
+        max_flow = part_1(neighbour, minute, flow_rate, max_flow)
+
+        flow_rate -= fr[i]
+        minute += distance
+        minute += 1
+
+    node.open = False
+
+    if flow_rate > max_flow:
+        return flow_rate
+
+    return max_flow
 
 
 def main():
-    df = pd.read_csv("sample.txt", header=None, names=["full_text"], sep="<>")
+    df = pd.read_csv("day_16.txt", header=None, names=["full_text"], sep="<>")
 
     df["flow_rate"] = df["full_text"].apply(lambda x: re.search(r"-?\d+", x).group())
 
@@ -77,15 +134,29 @@ def main():
     graph = df.apply(create_node, axis=1).values
     df.apply(create_neighbours, graph=graph, axis=1)
 
+    for i in range(len(graph)):
+        print(i)
+        node = graph[i]
 
-    for node in graph:
-        if node.fr != 0:
-            continue
+        neighbours = copy(node.neighbours)
+        node.visited = True
+
+        for neig in neighbours:
+            recursion(node, neig[0], 1)
 
         for n in graph:
-            move_neighbours(node, n)
+            n.visited = False
 
-    graph = [subl for subl in graph if subl.fr != 0]
+    start_node = [n for n in graph if n.idx == "AA"][0]
+
+    for node in graph:
+        node.neighbours = [n for n in node.neighbours if n[0].fr != 0]
+
+    #graph = [subl for subl in graph if subl.fr != 0]
+
+    max_flow = part_1(start_node, 30, 0, 0)
+
+    print(max_flow)
 
 
 if __name__ == "__main__":

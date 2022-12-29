@@ -37,7 +37,6 @@ def create_node(row):
 
 
 def recursion(node, add_node, distance):
-
     if node == add_node:
         return
 
@@ -76,55 +75,100 @@ def sort_by_max(start_node, minute):
             if values[j] < values[j + 1]:
                 values[j], values[j + 1] = values[j + 1], values[j]
                 start_node.neighbours[j], start_node.neighbours[j + 1] = start_node.neighbours[j + 1], \
-                start_node.neighbours[j]
+                    start_node.neighbours[j]
 
     return values
 
 
-def part_1(node, minute, flow_rate, max_flow):
+def move_func(node, minute, flow):
+    for ndistance in node.neighbours:
+        neighbour = ndistance[0]
 
-    if minute <= 1:
-        node.open = False
-
-        if flow_rate > max_flow:
-            return flow_rate
-
-        return max_flow
-
-    fr = sort_by_max(node, minute)
-
-    for i in range(len(fr)):
-        neighbour = node.neighbours[i][0]
-        distance = node.neighbours[i][1]
-
-        if neighbour.open:
+        if neighbour.visited:
             continue
 
-        if minute - distance <= 0:
+        m = minute - ndistance[1] - 1
+
+        if m <= 0:
             continue
 
-        neighbour.open = True
+        neighbour.visited = True
+        f = m * neighbour.fr
 
-        flow_rate += fr[i]
-        minute -= distance # Time to travel
-        minute -= 1 # Time to open
+        return f + flow, m, neighbour
 
-        max_flow = part_1(neighbour, minute, flow_rate, max_flow)
+    return flow, 0, node
 
-        flow_rate -= fr[i]
-        minute += distance
-        minute += 1
 
-    node.open = False
+def part_2(start_node):
+    m1 = m2 = 26
+    f1 = f2 = 0
+    n1 = n2 = start_node
 
-    if flow_rate > max_flow:
-        return flow_rate
+    while True:
 
-    return max_flow
+        if m1 >= m2:
+            f1, m1, n1 = move_func(n1, m1, f1)
+        else:
+            f2, m2, n2 = move_func(n2, m2, f2)
+
+        if m1 == m1 == 0:
+            m1 = m2 = 26
+            f1 = f2 = 0
+            n1 = n2 = start_node
+
+
+def part_2_2(n1, n2, m1, m2, f1, f2, max1, max2):
+    fr_1 = sort_by_max(n1, m1)
+    fr_2 = sort_by_max(n2, m2)
+
+    if m1 >= m2:
+
+        for i in range(len(fr_1)):
+            neighbour = n1.neighbours[i][0]
+            distance = n1.neighbours[i][1]
+
+            if neighbour.open:
+                continue
+
+            if m1 - distance - 1 <= 0:
+                continue
+
+            m = m1 - distance - 1
+            neighbour.open = True
+            max1, max2 = part_2_2(neighbour, n2, m, m2, f1 + fr_1[i], f2, max1, max2)
+
+
+    else:
+
+        for i in range(len(fr_2)):
+
+            if f2 == 0:
+                print("")
+            neighbour = n2.neighbours[i][0]
+            distance = n2.neighbours[i][1]
+
+            if neighbour.open:
+                continue
+
+            if m2 - distance - 1 <= 0:
+                continue
+
+            m = m2 - distance - 1
+            neighbour.open = True
+            max1, max2 = part_2_2(n1, neighbour, m1, m, f1, f2 + fr_2[i], max1, max2)
+
+    n1.open = False
+    n2.open = False
+
+    if (f1 + f2) > (max1 + max2):
+        return f1, f2
+
+    return max1, max2
 
 
 def main():
-    df = pd.read_csv("day_16.txt", header=None, names=["full_text"], sep="<>")
+    df = pd.read_csv("sample.txt", header=None, names=["full_text"], sep="<>")
 
     df["flow_rate"] = df["full_text"].apply(lambda x: re.search(r"-?\d+", x).group())
 
@@ -135,7 +179,6 @@ def main():
     df.apply(create_neighbours, graph=graph, axis=1)
 
     for i in range(len(graph)):
-        print(i)
         node = graph[i]
 
         neighbours = copy(node.neighbours)
@@ -152,11 +195,9 @@ def main():
     for node in graph:
         node.neighbours = [n for n in node.neighbours if n[0].fr != 0]
 
-    #graph = [subl for subl in graph if subl.fr != 0]
-
-    max_flow = part_1(start_node, 30, 0, 0)
-
-    print(max_flow)
+    # graph = [subl for subl in graph if subl.fr != 0]
+    f1, f2 = part_2_2(start_node, start_node, 26, 26, 0, 0, 0, 0)
+    print(f1 + f2)
 
 
 if __name__ == "__main__":

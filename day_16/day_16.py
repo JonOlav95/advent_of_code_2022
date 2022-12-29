@@ -1,105 +1,147 @@
+from copy import copy
+from itertools import compress
+
 import pandas as pd
-import numpy as np
 import re
-
-
-def rec(graph, current_node, minutes, accum_flow):
-
-    if minutes <= 0:
-        print(accum_flow)
-
-        return
-
-    minutes -= 1
-    accum_flow += current_node.flow_rate * minutes
-
-
-    for node in graph:
-        pass
+import numpy as np
 
 
 class Node:
-    def __init__(self, name, flow_rate, leads_to):
-        self.name = name
-        self.flow_rate = flow_rate
-        self.leads_to = leads_to
+    def __init__(self, idx, fr):
+        self.idx = idx
+        self.fr = fr
         self.visited = False
-        self.opened = False
+        self.open = False
+        self.neighbours = []
 
-        self.distance = 0
+    def add_neighbour(self, neighbour, dist):
+        self.neighbours.append([neighbour, dist])
+
+    def __eq__(self, other):
+        if self.idx == other:
+            return True
+        return False
 
 
-def create_graph(row):
-    node = Node(row["valve"], int(row["flow_rate"]), row["leads_to"])
+def create_neighbours(row, graph):
+    node = [x for x in graph if x.idx == row["valve"]][0]
 
+    for lead in row["leads_to"]:
+        lead = [x for x in graph if x.idx == lead][0]
+        node.add_neighbour(lead, 1)
+
+
+def create_node(row):
+    node = Node(row["valve"], int(row["flow_rate"]))
     return node
 
 
-def part_1(graph):
-    minutes = 30
-    lambda_func = np.vectorize(lambda x: x.name == "AA")
-    current_node = graph[lambda_func(graph)][0]
-    visited_nodes = [current_node]
-    acc_flow = 0
+def recursion(node, add_node, distance):
 
-    while minutes > 0:
-        for node in graph:
-            node.visited = False
-            node.distance = 0
+    if node == add_node:
+        return
 
-        max_flow = -9999
-        max_node = None
+    for n in node.neighbours:
+        if n[0] == add_node:
+            if distance <= n[1]:
+                node.neighbours.remove(n)
 
-        while visited_nodes:
-            current_node = visited_nodes.pop(0)
+            if distance > n[1]:
+                return
 
-            for node in current_node.leads_to:
-                debug_name = node
-                lambda_func = np.vectorize(lambda x: x.name == node)
-                node = graph[lambda_func(graph)][0]
-
-                if node.visited or node.opened:
-                    continue
-
-                node.distance = current_node.distance + 1
-                time_left = minutes - node.distance
-
-                # Time to open
-                time_left -= 1
-
-                total_flow = time_left * node.flow_rate
-
-                if total_flow > max_flow:
-                    max_flow = total_flow
-                    max_node = node
-
-                node.visited = True
-                visited_nodes.append(node)
-
-        if max_node:
-            acc_flow += max_flow
-            minutes = time_left
-            max_node.opened = True
-            visited_nodes = [max_node]
-            print(max_node.name)
-        else:
             break
 
-    print(acc_flow)
+    node.add_neighbour(add_node, distance)
+
+    for neigh in add_node.neighbours:
+        if neigh[1] > 1:
+            continue
+
+        recursion(node, neigh[0], distance + neigh[1])
+
+
+def sort_by_max(start_node, minute):
+    length = len(start_node.neighbours) - 1
+    values = []
+
+    for neigh in start_node.neighbours:
+        neighbour = neigh[0]
+        distance = neigh[1]
+
+        value = neighbour.fr * (minute - distance - 1)
+        values.append(value)
+
+    for i in range(length):
+        for j in range(0, length - i):
+            if values[j] < values[j + 1]:
+                values[j], values[j + 1] = values[j + 1], values[j]
+                start_node.neighbours[j], start_node.neighbours[j + 1] = start_node.neighbours[j + 1], \
+                start_node.neighbours[j]
+
+    return values
+
+
+def part_1(node, minute, flow_rate, max_flow):
+
+
+    fr = sort_by_max(node, minute)
+
+    for i in range(len(fr)):
+        neighbour = node.neighbours[i][0]
+        distance = node.neighbours[i][1]
+
+        if neighbour.open:
+            continue
+
+        if minute - distance <= 0:
+            continue
+
+        neighbour.open = True
+
+        max_flow = part_1(neighbour, minute - distance - 1, flow_rate + fr[i], max_flow)
+
+    print(flow_rate)
+    node.open = False
+
+    if flow_rate > max_flow:
+        return flow_rate
+
+    return max_flow
 
 
 def main():
     df = pd.read_csv("sample.txt", header=None, names=["full_text"], sep="<>")
+
     df["flow_rate"] = df["full_text"].apply(lambda x: re.search(r"-?\d+", x).group())
 
     df["valve"] = df["full_text"].apply(lambda x: re.findall(r"\b[A-Z]{2}\b", x)[0])
     df["leads_to"] = df["full_text"].apply(lambda x: re.findall(r"\b[A-Z]{2}\b", x)[1:])
 
-    graph = df.apply(create_graph, axis=1).values
+    graph = df.apply(create_node, axis=1).values
+    df.apply(create_neighbours, graph=graph, axis=1)
 
-    part_1(graph)
+    for i in range(len(graph)):
+        node = graph[i]
 
-    return
+        neighbours = copy(node.neighbours)
+        node.visited = True
+
+        for neig in neighbours:
+            recursion(node, neig[0], 1)
+
+        for n in graph:
+            n.visited = False
+
+    start_node = [n for n in graph if n.idx == "AA"][0]
+
+    for node in graph:
+        node.neighbours = [n for n in node.neighbours if n[0].fr != 0]
+
+    #graph = [subl for subl in graph if subl.fr != 0]
+
+    max_flow = part_1(start_node, 30, 0, 0)
+
+    print(max_flow)
 
 
 if __name__ == "__main__":

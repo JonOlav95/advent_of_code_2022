@@ -137,14 +137,12 @@ def part_2_2(n1, n2, m1, m2, f1, f2, max1, max2):
             m = m1 - distance - 1
             neighbour.open = True
             max1, max2 = part_2_2(neighbour, n2, m, m2, f1 + fr_1[i], f2, max1, max2)
-
+            neighbour.open = False
 
     else:
 
         for i in range(len(fr_2)):
 
-            if f2 == 0:
-                print("")
             neighbour = n2.neighbours[i][0]
             distance = n2.neighbours[i][1]
 
@@ -157,9 +155,7 @@ def part_2_2(n1, n2, m1, m2, f1, f2, max1, max2):
             m = m2 - distance - 1
             neighbour.open = True
             max1, max2 = part_2_2(n1, neighbour, m1, m, f1, f2 + fr_2[i], max1, max2)
-
-    n1.open = False
-    n2.open = False
+            neighbour.open = False
 
     if (f1 + f2) > (max1 + max2):
         return f1, f2
@@ -168,7 +164,7 @@ def part_2_2(n1, n2, m1, m2, f1, f2, max1, max2):
 
 
 def main():
-    df = pd.read_csv("sample.txt", header=None, names=["full_text"], sep="<>")
+    df = pd.read_csv("day_16.txt", header=None, names=["full_text"], sep=".")
 
     df["flow_rate"] = df["full_text"].apply(lambda x: re.search(r"-?\d+", x).group())
 

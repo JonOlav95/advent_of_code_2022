@@ -122,12 +122,18 @@ def main():
             rock_count += 1
             x = 3
 
+            if 0 not in board[height, :]:
+                print()
+
         m_index += 1
 
         if m_index == len(move):
             m_index = 0
 
-        if rock_count == 2022:
+        if m_index == 0 and s_index == 0:
+            print()
+
+        if rock_count == 11111111:
             break
 
     height = 0

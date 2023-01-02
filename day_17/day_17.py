@@ -39,6 +39,22 @@ def get_shapes(s_index, y, x):
     return shapes[s_index]
 
 
+def sizes(idx):
+    if idx == 0:
+        return 1
+    elif idx == 1:
+        return 3
+    elif idx == 2:
+        return 3
+    elif idx == 3:
+        return 4
+    elif idx == 4:
+        return 2
+
+    print("abcdvsdcvds")
+    return -1
+
+
 def main():
     move = pd.read_csv("sample.txt", header=None)[0].values[0]
 
@@ -56,8 +72,14 @@ def main():
     s_index = 0
     rock_count = 0
 
+    # ROCK COUNT 31
     while True:
 
+        if rock_count == 30:
+            print()
+        shape = get_shapes(s_index, y, x)
+        board[shape] = 2
+        board[shape] = 0
         if move[m_index] == ">":
             shape = get_shapes(s_index, y, x + 1)
             if move_right(board, shape):
@@ -71,8 +93,6 @@ def main():
         shape = get_shapes(s_index, y + 1, x)
         if move_down(board, shape):
             y += 1
-            board[shape] = 2
-            board[shape] = 0
         else:
             shape = get_shapes(s_index, y, x)
             board[shape] = 1
@@ -81,24 +101,22 @@ def main():
             if s_index == 5:
                 s_index = 0
 
-            a = -1
-            if s_index == 0:
-                a = 1
-            elif s_index == 1:
-                a = 3
-            elif s_index == 2:
-                a = 3
-            elif s_index == 3:
-                a = 4
-            elif s_index == 4:
-                a = 2
+            a = sizes(s_index)
+            height = 0
 
-            for i in range(y, 3 + a):
-                board = np.concatenate((np.array([[1, 0, 0, 0, 0, 0, 0, 0, 1]]), board))
+            for i in range(len(board)):
+                tmp = board[i, 1:-1]
+                if 1 in tmp:
+                    break
+                else:
+                    height += 1
 
-            if y > 3 + a:
-                y = y - 3 - a
+            if height > 3 + a:
+                y = height - 3 - a
             else:
+                for i in range(height, 3 + a):
+                    board = np.concatenate((np.array([[1, 0, 0, 0, 0, 0, 0, 0, 1]]), board))
+
                 y = 0
 
             rock_count += 1
@@ -112,7 +130,16 @@ def main():
         if rock_count == 2022:
             break
 
-    print(len(board) - 3)
+    height = 0
+
+    for i in range(len(board)):
+        tmp = board[i, 1:-1]
+        if 1 in tmp:
+            break
+        else:
+            height += 1
+
+    print(len(board) - height - 1)
 
 
 if __name__ == "__main__":

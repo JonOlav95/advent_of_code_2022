@@ -133,10 +133,11 @@ def main():
         if m_index == 0 and s_index == 0:
             print()
 
-        if rock_count == 11111111:
+        if rock_count > 615 and m_index == 0:
             break
 
     height = 0
+    print(rock_count)
 
     for i in range(len(board)):
         tmp = board[i, 1:-1]

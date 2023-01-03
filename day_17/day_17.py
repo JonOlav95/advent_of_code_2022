@@ -86,6 +86,7 @@ def main():
     prev_rock = 0
     prev_dist = 0
 
+    tmp_arr = []
 
     # ROCK COUNT 31
     while True:
@@ -130,50 +131,35 @@ def main():
             rock_count += 1
             x = 3
 
-            before_pattern = len(board)
-
-            if before_pattern >= 26:
-                print(rock_count)
-
-            if rock_count == 2022:
-                print()
-
-            if rock_count == 1000:
-                pattern = board[len(board) - 300:len(board) - 100, 1:-1]
-
-            if rock_count > 1100:
-                if (board[300:500, 1:-1] == pattern).all():
-                    #print(len(board))
-                    #print(pattern_dist)
-
-                    if not prev_dist == len(board):
-                       # print("DIST: " + str(len(board) - prev_dist))
-                        #print("ROCK: " + str(rock_count - prev_rock))
-
-                        prev_rock = rock_count
-                        prev_dist = len(board)
+            tmp_arr.append([len(board), rock_count, s_index])
 
         m_index += 1
 
         if m_index == len(move):
             m_index = 0
 
-        if rock_count > 10000:
+        if rock_count > 2000:
             break
 
+    # i = 306
+    # zeroes on top of board = 6
+    # [303, 182, 2]
+    # [306, 183, 3]
+    # [306, 184, 4]
+    # [306, 185, 0]
+    # [308, 186, 1]
+    # j = 1054
     i = 0
     while True:
-        pattern = board[len(board) - i - 100:len(board) - i, 1:-1]
+        pattern = board[len(board) - i - 300:len(board) - i, 1:-1]
 
-        for j in range(1000):
-            match = board[0 + j:100 + j, 1:-1]
+        for j in range(1500):
+            match = board[0 + j:300 + j, 1:-1]
 
             if (pattern == match).all():
                 print(i)
 
         i += 1
-
-    height = get_height(board)
 
     print(rock_count)
     print(len(board) - height - 1)

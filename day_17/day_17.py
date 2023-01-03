@@ -55,6 +55,18 @@ def sizes(idx):
     return -1
 
 
+def get_height(board):
+    height = 0
+    for i in range(len(board)):
+        tmp = board[i, 1:-1]
+        if 1 in tmp:
+            break
+        else:
+            height += 1
+
+    return height
+
+
 def main():
     move = pd.read_csv("sample.txt", header=None)[0].values[0]
 
@@ -71,6 +83,9 @@ def main():
     m_index = 0
     s_index = 0
     rock_count = 0
+    prev_rock = 0
+    prev_dist = 0
+
 
     # ROCK COUNT 31
     while True:
@@ -102,14 +117,7 @@ def main():
                 s_index = 0
 
             a = sizes(s_index)
-            height = 0
-
-            for i in range(len(board)):
-                tmp = board[i, 1:-1]
-                if 1 in tmp:
-                    break
-                else:
-                    height += 1
+            height = get_height(board)
 
             if height > 3 + a:
                 y = height - 3 - a
@@ -122,30 +130,52 @@ def main():
             rock_count += 1
             x = 3
 
-            if 0 not in board[height, :]:
+            before_pattern = len(board)
+
+            if before_pattern >= 26:
+                print(rock_count)
+
+            if rock_count == 2022:
                 print()
+
+            if rock_count == 1000:
+                pattern = board[len(board) - 300:len(board) - 100, 1:-1]
+
+            if rock_count > 1100:
+                if (board[300:500, 1:-1] == pattern).all():
+                    #print(len(board))
+                    #print(pattern_dist)
+
+                    if not prev_dist == len(board):
+                       # print("DIST: " + str(len(board) - prev_dist))
+                        #print("ROCK: " + str(rock_count - prev_rock))
+
+                        prev_rock = rock_count
+                        prev_dist = len(board)
 
         m_index += 1
 
         if m_index == len(move):
             m_index = 0
 
-        if m_index == 0 and s_index == 0:
-            print()
-
-        if rock_count > 615 and m_index == 0:
+        if rock_count > 10000:
             break
 
-    height = 0
+    i = 0
+    while True:
+        pattern = board[len(board) - i - 100:len(board) - i, 1:-1]
+
+        for j in range(1000):
+            match = board[0 + j:100 + j, 1:-1]
+
+            if (pattern == match).all():
+                print(i)
+
+        i += 1
+
+    height = get_height(board)
+
     print(rock_count)
-
-    for i in range(len(board)):
-        tmp = board[i, 1:-1]
-        if 1 in tmp:
-            break
-        else:
-            height += 1
-
     print(len(board) - height - 1)
 
 
